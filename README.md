@@ -22,6 +22,24 @@ https://raw.githubusercontent.com/gurutto-manila/hostblocksites/main/hosts
 
 Do not use the GitHub `/blob/` page URL with `Invoke-WebRequest`; that URL returns an HTML page rather than the plain hosts file.
 
+## Quick install — one command
+
+Right-click **Start**, open **Terminal (Admin)** or **PowerShell (Admin)**, approve the administrator prompt, and paste this command:
+
+```powershell
+irm https://raw.githubusercontent.com/gurutto-manila/hostblocksites/main/install-hostblocksites.ps1 | iex
+```
+
+`irm` is the PowerShell alias for `Invoke-RestMethod`, and `iex` runs the downloaded installer. You can [review the installer source](https://github.com/gurutto-manila/hostblocksites/blob/main/install-hostblocksites.ps1) before running it.
+
+### One command from Command Prompt
+
+Open **Command Prompt as administrator** and paste:
+
+```cmd
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "irm 'https://raw.githubusercontent.com/gurutto-manila/hostblocksites/main/install-hostblocksites.ps1' | iex"
+```
+
 ## Install with PowerShell
 
 1. Download [`install-hostblocksites.ps1`](install-hostblocksites.ps1) from this repository.
@@ -56,9 +74,25 @@ The installer prints the number of installed entries and the exact backup locati
 
 ## Update the blocklist
 
-Run the installer again. It downloads the current GitHub list and replaces only the section it previously managed.
+Run the quick-install command again. It downloads the current GitHub list and replaces only the section it previously managed.
 
 ## Uninstall the blocklist
+
+For a one-command uninstall, open PowerShell as administrator and paste:
+
+```powershell
+irm https://raw.githubusercontent.com/gurutto-manila/hostblocksites/main/uninstall-hostblocksites.ps1 | iex
+```
+
+From an administrator Command Prompt:
+
+```cmd
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "irm 'https://raw.githubusercontent.com/gurutto-manila/hostblocksites/main/uninstall-hostblocksites.ps1' | iex"
+```
+
+This removes only the section between the HostBlockSites markers. Other hosts-file entries are preserved.
+
+### Uninstall using a downloaded file
 
 Download [`uninstall-hostblocksites.ps1`](uninstall-hostblocksites.ps1), open PowerShell or Command Prompt as administrator, and run one of the following.
 
@@ -73,8 +107,6 @@ Command Prompt:
 ```cmd
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%USERPROFILE%\Downloads\uninstall-hostblocksites.ps1"
 ```
-
-This removes only the section between the HostBlockSites markers. Other hosts-file entries are preserved.
 
 ## Restore a backup manually
 
