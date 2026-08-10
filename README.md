@@ -140,7 +140,16 @@ If Windows reports that access to `C:\Windows\System32\drivers\etc\hosts` is den
 1. Close the current window.
 2. Right-click **Start** and select **Terminal (Admin)**.
 3. Approve the User Account Control prompt. The window should identify itself as **Administrator**.
-4. Run the quick-install command again.
+4. Paste and run this permission-repair and installation block:
+
+```powershell
+$HostsFile = "$env:SystemRoot\System32\drivers\etc\hosts"
+attrib.exe -R $HostsFile
+icacls.exe $HostsFile /reset
+irm https://raw.githubusercontent.com/gurutto-manila/hostblocksites/main/install-hostblocksites.ps1 | iex
+```
+
+This clears the hosts file's read-only attribute, resets its access permissions to those inherited from the Windows `etc` directory, and then runs the installer again.
 
 The installer automatically clears the hosts file's read-only attribute when necessary and stages the replacement in the temporary folder before copying it into the protected Windows directory.
 
