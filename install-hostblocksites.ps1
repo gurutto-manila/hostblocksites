@@ -78,7 +78,28 @@ try {
         }
 
         Write-Host "[5/6] Installing the updated hosts file..." -ForegroundColor Cyan
-        Copy-Item -LiteralPath $StagedFile -Destination $HostsFile -Force
+
+        $Installed = $false
+        for ($Attempt = 1; $Attempt -le 5; $Attempt++) {
+            try {
+                Copy-Item -LiteralPath $StagedFile -Destination $HostsFile -Force -ErrorAction Stop
+                $Installed = $true
+                break
+            }
+            catch [System.IO.IOException] {
+                if ($Attempt -lt 5) {
+                    Write-Warning "The hosts file is temporarily in use. Retrying in 3 seconds ($Attempt/5)..."
+                    Start-Sleep -Seconds 3
+                }
+                else {
+                    throw "The hosts file remained locked after 5 attempts. Close GenP, Notepad, hosts-file managers, and other tools that may have the file open, then retry."
+                }
+            }
+        }
+
+        if (-not $Installed) {
+            throw "The updated hosts file could not be installed."
+        }
     }
     catch [System.UnauthorizedAccessException] {
         throw "Windows denied access to '$HostsFile'. Confirm that Terminal says 'Administrator'. If it does, Windows Security, third-party antivirus, or an organization policy may be protecting the hosts file. The original hosts file has not been intentionally removed; backup: $BackupFile"

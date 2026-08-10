@@ -38,7 +38,27 @@ try {
         $AttributesChanged = $true
     }
 
-    Copy-Item -LiteralPath $StagedFile -Destination $HostsFile -Force
+    $Removed = $false
+    for ($Attempt = 1; $Attempt -le 5; $Attempt++) {
+        try {
+            Copy-Item -LiteralPath $StagedFile -Destination $HostsFile -Force -ErrorAction Stop
+            $Removed = $true
+            break
+        }
+        catch [System.IO.IOException] {
+            if ($Attempt -lt 5) {
+                Write-Warning "The hosts file is temporarily in use. Retrying in 3 seconds ($Attempt/5)..."
+                Start-Sleep -Seconds 3
+            }
+            else {
+                throw "The hosts file remained locked after 5 attempts. Close programs that may have it open, then retry."
+            }
+        }
+    }
+
+    if (-not $Removed) {
+        throw "The HostBlockSites section could not be removed."
+    }
 }
 catch [System.UnauthorizedAccessException] {
     throw "Windows denied access to '$HostsFile'. Confirm that Terminal says 'Administrator'. If it does, security software or an organization policy may be protecting the hosts file. Backup: $BackupFile"

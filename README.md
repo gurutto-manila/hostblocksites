@@ -173,3 +173,21 @@ The installer automatically clears the hosts file's read-only attribute when nec
 If access is still denied from a confirmed administrator terminal, Windows Security, third-party security software, or an organization policy may be protecting the hosts file. Do not disable security protection globally. Allow this specific, reviewed script or ask the computer's administrator to make the change.
 
 Microsoft's manual workaround is to prepare the hosts file outside the protected directory and then copy it into `%WinDir%\System32\drivers\etc` with administrator approval. See [Microsoft: You can't modify the Hosts or Lmhosts file](https://learn.microsoft.com/en-us/troubleshoot/windows-server/networking/cannot-modify-hosts-lmhosts-files).
+
+## Troubleshooting: the hosts file is being used by another program
+
+The installer automatically retries a temporarily locked hosts file five times. If the file remains locked:
+
+1. Close GenP completely.
+2. Close Notepad, hosts-file editors, and hosts-management utilities.
+3. Wait for any antivirus scan to finish.
+4. Restart Windows normally and run the installer before reopening those programs.
+
+If the error continues, use Microsoft's [Process Explorer](https://learn.microsoft.com/en-us/sysinternals/downloads/process-explorer) to identify the program holding the file:
+
+1. Run Process Explorer as administrator.
+2. Select **Find > Find Handle or DLL** or press **Ctrl+F**.
+3. Search for `\System32\drivers\etc\hosts`.
+4. Close the identified application normally, then rerun the installer.
+
+Do not force-close a handle belonging to Windows, antivirus software, or another security process. Restart Windows or configure the responsible application through its normal settings instead.
