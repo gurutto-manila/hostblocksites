@@ -132,3 +132,18 @@ Replace `YYYYMMDD-HHMMSS` with the timestamp of the backup you want to restore.
 - A very large hosts file can make name resolution or some applications slower.
 - If a wanted site stops working, uninstall this blocklist or remove the relevant entry from the source list and reinstall.
 - Review third-party lists before trusting them; changes to this GitHub file affect the next update.
+
+## Troubleshooting: access to the hosts file is denied
+
+If Windows reports that access to `C:\Windows\System32\drivers\etc\hosts` is denied:
+
+1. Close the current window.
+2. Right-click **Start** and select **Terminal (Admin)**.
+3. Approve the User Account Control prompt. The window should identify itself as **Administrator**.
+4. Run the quick-install command again.
+
+The installer automatically clears the hosts file's read-only attribute when necessary and stages the replacement in the temporary folder before copying it into the protected Windows directory.
+
+If access is still denied from a confirmed administrator terminal, Windows Security, third-party security software, or an organization policy may be protecting the hosts file. Do not disable security protection globally. Allow this specific, reviewed script or ask the computer's administrator to make the change.
+
+Microsoft's manual workaround is to prepare the hosts file outside the protected directory and then copy it into `%WinDir%\System32\drivers\etc` with administrator approval. See [Microsoft: You can't modify the Hosts or Lmhosts file](https://learn.microsoft.com/en-us/troubleshoot/windows-server/networking/cannot-modify-hosts-lmhosts-files).

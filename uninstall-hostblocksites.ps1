@@ -10,6 +10,7 @@ if (-not $IsAdministrator) {
 
 $HostsFile   = Join-Path $env:SystemRoot "System32\drivers\etc\hosts"
 $BackupFile  = "$HostsFile.backup-before-uninstall-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
+$StagedFile  = Join-Path $env:TEMP "hostblocksites-uninstall-$([guid]::NewGuid().ToString('N')).txt"
 $BeginMarker = "# BEGIN HOSTBLOCKSITES MANAGED BLOCKLIST"
 $EndMarker   = "# END HOSTBLOCKSITES MANAGED BLOCKLIST"
 $Utf8NoBom   = New-Object System.Text.UTF8Encoding($false)
@@ -24,9 +25,39 @@ if (-not [regex]::IsMatch($ExistingContent, $ManagedPattern)) {
 
 Copy-Item -LiteralPath $HostsFile -Destination $BackupFile -Force
 $NewContent = [regex]::Replace($ExistingContent, $ManagedPattern, '').TrimEnd("`r", "`n") + "`r`n"
-[IO.File]::WriteAllText($HostsFile, $NewContent, $Utf8NoBom)
+[IO.File]::WriteAllText($StagedFile, $NewContent, $Utf8NoBom)
+
+$OriginalAttributes = [IO.File]::GetAttributes($HostsFile)
+$WasReadOnly = ($OriginalAttributes -band [IO.FileAttributes]::ReadOnly) -ne 0
+$AttributesChanged = $false
+
+try {
+    if ($WasReadOnly) {
+        $WritableAttributes = $OriginalAttributes -band (-bnot [IO.FileAttributes]::ReadOnly)
+        [IO.File]::SetAttributes($HostsFile, $WritableAttributes)
+        $AttributesChanged = $true
+    }
+
+    Copy-Item -LiteralPath $StagedFile -Destination $HostsFile -Force
+}
+catch [System.UnauthorizedAccessException] {
+    throw "Windows denied access to '$HostsFile'. Confirm that Terminal says 'Administrator'. If it does, security software or an organization policy may be protecting the hosts file. Backup: $BackupFile"
+}
+finally {
+    if ($AttributesChanged -and (Test-Path -LiteralPath $HostsFile)) {
+        try {
+            [IO.File]::SetAttributes($HostsFile, $OriginalAttributes)
+        }
+        catch {
+            Write-Warning "The hosts file was updated, but its original file attributes could not be restored: $($_.Exception.Message)"
+        }
+    }
+    if (Test-Path -LiteralPath $StagedFile) {
+        Remove-Item -LiteralPath $StagedFile -Force
+    }
+}
+
 Clear-DnsClientCache
 
 Write-Host "HostBlockSites removed successfully."
 Write-Host "Backup created at: $BackupFile"
-
