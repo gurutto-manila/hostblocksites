@@ -76,6 +76,61 @@ The installer prints the number of installed entries and the exact backup locati
 
 Run the quick-install command again. It downloads the current GitHub list and replaces only the section it previously managed.
 
+## Microsoft services compatibility
+
+The source list currently contains direct entries for LinkedIn, Skype, Minecraft, Xbox, and related Microsoft-owned services. The installer preserves the productivity and communication services listed below while deliberately leaving gaming services blocked:
+
+```text
+*.microsoft.com
+*.microsoftonline.com
+*.windows.com
+*.windowsupdate.com
+*.office.com
+*.office365.com
+*.office.net
+*.live.com
+*.outlook.com
+*.hotmail.com
+*.msn.com
+*.bing.com
+*.skype.com
+*.lync.com
+*.teams.microsoft.com
+*.teams.cloud.microsoft
+*.skypeassets.com
+*.teams.cdn.office.net
+*.onedrive.com
+*.sharepoint.com
+*.linkedin.com
+*.licdn.com
+*.github.com
+*.githubusercontent.com
+*.githubassets.com
+aka.ms
+sfx.ms
+mlccdnprod.azureedge.net
+```
+
+Gaming services remain blocked through entries such as:
+
+```text
+0.0.0.0 minecraft.net
+0.0.0.0 www.minecraft.net
+0.0.0.0 minecraftservices.com
+0.0.0.0 xbox.com
+0.0.0.0 xboxlive.com
+0.0.0.0 steampowered.com
+0.0.0.0 epicgames.com
+0.0.0.0 riotgames.com
+0.0.0.0 roblox.com
+0.0.0.0 playstation.com
+0.0.0.0 nintendo.com
+```
+
+After uploading a new installer version, run the quick-install command again. It replaces the previous HostBlockSites section, removes blocked Microsoft service entries, and clears the Windows DNS cache.
+
+The Windows hosts file supports exact hostnames rather than wildcard rules. The `*.` notation above describes the domain families that the installer excludes while processing the downloaded list.
+
 ## Uninstall the blocklist
 
 For a one-command uninstall, open PowerShell as administrator and paste:

@@ -17,6 +17,61 @@ $BeginMarker = "# BEGIN HOSTBLOCKSITES MANAGED BLOCKLIST"
 $EndMarker   = "# END HOSTBLOCKSITES MANAGED BLOCKLIST"
 $Utf8NoBom   = New-Object System.Text.UTF8Encoding($false)
 
+# Keep Microsoft services available even if the downloaded source contains
+# Microsoft-owned or Microsoft-required service domains.
+$AllowedDomainSuffixes = @(
+    "microsoft.com"
+    "microsoftonline.com"
+    "microsoftonline-p.com"
+    "windows.com"
+    "windowsupdate.com"
+    "office.com"
+    "office365.com"
+    "office.net"
+    "live.com"
+    "outlook.com"
+    "hotmail.com"
+    "msn.com"
+    "bing.com"
+    "skype.com"
+    "lync.com"
+    "teams.microsoft.com"
+    "teams.cloud.microsoft"
+    "skypeassets.com"
+    "teams.cdn.office.net"
+    "onedrive.com"
+    "sharepoint.com"
+    "linkedin.com"
+    "licdn.com"
+    "github.com"
+    "githubusercontent.com"
+    "githubassets.com"
+)
+$AllowedExactDomains = @(
+    "aka.ms"
+    "sfx.ms"
+    "mlccdnprod.azureedge.net"
+)
+
+function Test-IsAllowedDomain {
+    param([Parameter(Mandatory = $true)][string] $Domain)
+
+    foreach ($ExactDomain in $AllowedExactDomains) {
+        if ($Domain.Equals($ExactDomain, [StringComparison]::OrdinalIgnoreCase)) {
+            return $true
+        }
+    }
+
+    foreach ($Suffix in $AllowedDomainSuffixes) {
+        if ($Domain.Equals($Suffix, [StringComparison]::OrdinalIgnoreCase) -or
+            $Domain.EndsWith(".$Suffix", [StringComparison]::OrdinalIgnoreCase)) {
+            return $true
+        }
+    }
+
+    return $false
+}
+
 try {
     Write-Host "[1/6] Downloading HostBlockSites..." -ForegroundColor Cyan
     Invoke-WebRequest -Uri $ListUrl -OutFile $ListFile -UseBasicParsing
@@ -26,7 +81,10 @@ try {
         Get-Content -LiteralPath $ListFile |
             ForEach-Object {
                 if ($_ -match '^\s*0\.0\.0\.0\s+([^\s#]+)') {
-                    "0.0.0.0 $($Matches[1].ToLowerInvariant())"
+                    $Domain = $Matches[1].ToLowerInvariant()
+                    if (-not (Test-IsAllowedDomain -Domain $Domain)) {
+                        "0.0.0.0 $Domain"
+                    }
                 }
             } |
             Sort-Object -Unique
