@@ -151,6 +151,23 @@ irm https://raw.githubusercontent.com/gurutto-manila/hostblocksites/main/install
 
 This clears the hosts file's read-only attribute, resets its access permissions to those inherited from the Windows `etc` directory, and then runs the installer again.
 
+### How to tell whether the installer is still running
+
+The installer displays six numbered stages. Processing and deduplicating the downloaded list can take a while on slower computers.
+
+- If the `PS C:\...>` prompt has not returned, PowerShell is still working.
+- A blinking cursor by itself does not indicate an error.
+- `HostBlockSites installed successfully` means installation finished.
+- `HostBlockSites installation failed` means no successful installation was completed. Copy the complete `Reason:` line when reporting the problem.
+
+To check whether the managed block was installed, run:
+
+```powershell
+Select-String -Path "$env:SystemRoot\System32\drivers\etc\hosts" -Pattern "BEGIN HOSTBLOCKSITES MANAGED BLOCKLIST"
+```
+
+If it displays the marker and the installer reported success, the managed section is present.
+
 The installer automatically clears the hosts file's read-only attribute when necessary and stages the replacement in the temporary folder before copying it into the protected Windows directory.
 
 If access is still denied from a confirmed administrator terminal, Windows Security, third-party security software, or an organization policy may be protecting the hosts file. Do not disable security protection globally. Allow this specific, reviewed script or ask the computer's administrator to make the change.

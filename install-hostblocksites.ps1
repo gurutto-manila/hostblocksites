@@ -18,9 +18,10 @@ $EndMarker   = "# END HOSTBLOCKSITES MANAGED BLOCKLIST"
 $Utf8NoBom   = New-Object System.Text.UTF8Encoding($false)
 
 try {
-    Write-Host "Downloading HostBlockSites..."
+    Write-Host "[1/6] Downloading HostBlockSites..." -ForegroundColor Cyan
     Invoke-WebRequest -Uri $ListUrl -OutFile $ListFile -UseBasicParsing
 
+    Write-Host "[2/6] Processing and removing duplicate entries..." -ForegroundColor Cyan
     $Entries = @(
         Get-Content -LiteralPath $ListFile |
             ForEach-Object {
@@ -35,6 +36,8 @@ try {
         throw "The downloaded file did not contain any usable 0.0.0.0 hosts entries. The Windows hosts file was not changed."
     }
 
+    Write-Host "      Found $($Entries.Count) unique entries."
+    Write-Host "[3/6] Creating a backup of the current hosts file..." -ForegroundColor Cyan
     Copy-Item -LiteralPath $HostsFile -Destination $BackupFile -Force
 
     $ExistingContent = [IO.File]::ReadAllText($HostsFile)
@@ -56,6 +59,8 @@ try {
         "$CleanContent`r`n`r`n$ManagedBlock`r`n"
     }
 
+    Write-Host "[4/6] Preparing the updated hosts file..." -ForegroundColor Cyan
+
     # Build the replacement outside the protected Windows directory first.
     # This follows Microsoft's recommended pattern of preparing a hosts file
     # elsewhere and then copying it into the Etc directory as administrator.
@@ -72,6 +77,7 @@ try {
             $AttributesChanged = $true
         }
 
+        Write-Host "[5/6] Installing the updated hosts file..." -ForegroundColor Cyan
         Copy-Item -LiteralPath $StagedFile -Destination $HostsFile -Force
     }
     catch [System.UnauthorizedAccessException] {
@@ -88,15 +94,18 @@ try {
         }
     }
 
+    Write-Host "[6/6] Clearing the Windows DNS cache..." -ForegroundColor Cyan
     Clear-DnsClientCache
 
-    Write-Host "HostBlockSites installed successfully."
+    Write-Host "HostBlockSites installed successfully." -ForegroundColor Green
     Write-Host "Entries installed: $($Entries.Count)"
     Write-Host "Backup created at: $BackupFile"
 }
 catch {
-    Write-Error $_
-    exit 1
+    Write-Host "HostBlockSites installation failed." -ForegroundColor Red
+    Write-Host "Reason: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "If a backup was created, its expected path is: $BackupFile"
+    throw
 }
 finally {
     if (Test-Path -LiteralPath $ListFile) {
