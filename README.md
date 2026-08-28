@@ -3,7 +3,7 @@
 Install the [`hosts`](https://github.com/gurutto-manila/hostblocksites/blob/main/hosts) blocklist in the Windows hosts file.
 
 > [!WARNING]
-> This is a broad blocklist, not an adult-only list. Its current contents also block major sites and services such as YouTube, Netflix, Facebook, Instagram, TikTok, Discord, Steam, Amazon, Shopee, and others. Review the list before installing it.
+> This is a broad blocklist, not an adult-only list. Its current contents also block major sites and services such as Netflix, Facebook, Instagram, TikTok, Discord, Steam, Amazon, Shopee, and others. Review the list before installing it.
 
 ## What the installer does
 
@@ -130,6 +130,10 @@ Gaming services remain blocked through entries such as:
 After uploading a new installer version, run the quick-install command again. It replaces the previous HostBlockSites section, removes blocked Microsoft service entries, and clears the Windows DNS cache.
 
 The Windows hosts file supports exact hostnames rather than wildcard rules. The `*.` notation above describes the domain families that the installer excludes while processing the downloaded list.
+
+## YouTube compatibility
+
+The installer keeps `youtube.com`, `youtube-nocookie.com`, their subdomains, and `youtu.be` available. Run the installer again to remove any YouTube entries installed by an earlier version.
 
 ## Uninstall the blocklist
 

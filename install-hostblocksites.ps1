@@ -17,8 +17,8 @@ $BeginMarker = "# BEGIN HOSTBLOCKSITES MANAGED BLOCKLIST"
 $EndMarker   = "# END HOSTBLOCKSITES MANAGED BLOCKLIST"
 $Utf8NoBom   = New-Object System.Text.UTF8Encoding($false)
 
-# Keep Microsoft services available even if the downloaded source contains
-# Microsoft-owned or Microsoft-required service domains.
+# Keep required services available even if the downloaded source contains
+# their domains.
 $AllowedDomainSuffixes = @(
     "microsoft.com"
     "microsoftonline.com"
@@ -46,11 +46,14 @@ $AllowedDomainSuffixes = @(
     "github.com"
     "githubusercontent.com"
     "githubassets.com"
+    "youtube.com"
+    "youtube-nocookie.com"
 )
 $AllowedExactDomains = @(
     "aka.ms"
     "sfx.ms"
     "mlccdnprod.azureedge.net"
+    "youtu.be"
 )
 
 function Test-IsAllowedDomain {
